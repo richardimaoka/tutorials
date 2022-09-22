@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+
+	"github.com/manifoldco/promptui"
 )
 
 type singleCommand struct {
@@ -42,8 +44,8 @@ type CommandGroup struct {
 	results  string
 }
 
-func commandGroup(cmd ...string) CommandGroup {
-	return commandGroup()
+func Commands(cmd ...string) CommandGroup {
+	return CommandGroup{}
 }
 
 func (grp *CommandGroup) addTitle(title string) {
@@ -62,6 +64,21 @@ func RunCommands(cmdGroups []CommandGroup) {
 			if cmd.isComment() || cmd.isEmpty() {
 				continue // ignored
 			}
+
+			prompt := promptui.Select{
+				Label: "Executing the command",
+				Items: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+					"Saturday", "Sunday"},
+			}
+
+			_, result, err := prompt.Run()
+
+			if err != nil {
+				fmt.Printf("Prompt failed %v\n", err)
+				return
+			}
+
+			fmt.Println(result)
 
 			fmt.Println("### Executing the following command ###")
 			fmt.Println(cmd.command)
@@ -96,7 +113,7 @@ func WriteMarkdown(w io.Writer, cmdGroups []CommandGroup) {
 			fmt.Fprint(w, "```\n\n")
 		}
 
-		if grp.Results != "" {
+		if grp.results != "" {
 			fmt.Fprintln(w, "```sh:コピペして実行")
 			fmt.Fprintln(w, grp.results)
 			fmt.Fprint(w, "```\n\n")

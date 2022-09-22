@@ -1,9 +1,16 @@
 package main
 
-import (
-	"fmt"
-)
-
 func main() {
-	fmt.Println("tutorials executed")
+	var cmds []CommandGroup
+	// f := fmt.Sprintf
+
+	cmds = append(cmds, Commands(
+		"echo abc",
+		"echo def",
+		"",
+		"# this is a comment",
+		"echo jaff",
+	))
+
+	RunCommands(cmds)
 }
