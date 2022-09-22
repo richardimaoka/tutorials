@@ -3,54 +3,32 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 type SingleCommand struct {
-	Title   string
 	Comment string
-	Command string
+	Command string //if empty string, ignored in run, and empty line in markdown
 }
 
-type MultiCommands struct {
+type CommandGroup struct {
 	Title    string
-	Comment  string
-	Commands []string
+	Commands []SingleCommand // can be only one SingleCommand
 }
 
-func (c *SingleCommand) String() string {
-	if c.Comment == "" {
-		return c.Command
-	} else {
-		return "# " + c.Comment + "\n" + c.Command
-	}
-}
-
-func (c *MultiCommands) String() string {
-	if c.Comment == "" {
-		return strings.Join(c.Commands, "\n")
-	} else {
-		return "# " + c.Comment + "\n" + strings.Join(c.Commands, "\n")
-	}
-}
-
-func RunCommands(cmdBlocks []fmt.Stringer) {
+func RunCommands(cmdGroups []CommandGroup) {
 	input := bufio.NewScanner(os.Stdin)
 
-	for _, cmdBlk := range cmdBlocks {
-		var commands []string
-		switch v := cmdBlk.(type) {
-		case *SingleCommand:
-			commands = append(commands, v.Command)
-		case *MultiCommands:
-			commands = append(commands, v.Commands...)
-		}
+	for _, grp := range cmdGroups {
+		for _, cmd := range grp.Commands {
+			if cmd.Command == "" {
+				continue // empty Command is ignored
+			}
 
-		for _, cmdString := range commands {
 			fmt.Println("### Executing the following command ###")
-			fmt.Println(cmdString)
+			fmt.Println(cmd.Command)
 			fmt.Print("[y/n] ")
 
 			input.Scan()
@@ -58,7 +36,7 @@ func RunCommands(cmdBlocks []fmt.Stringer) {
 			switch text {
 			case "y":
 				fmt.Println("executing")
-				execCmd := exec.Command("sh", "-c", cmdString)
+				execCmd := exec.Command("sh", "-c", cmd.Command)
 				output, _ := execCmd.CombinedOutput()
 				fmt.Println(string(output))
 			case "n":
@@ -67,5 +45,23 @@ func RunCommands(cmdBlocks []fmt.Stringer) {
 				fmt.Print("[y/n] ")
 			}
 		}
+	}
+}
+
+func WriteMarkdown(w io.Writer, cmdGroups []CommandGroup) {
+	for _, grp := range cmdGroups {
+		fmt.Fprintln(w, grp.Title)
+
+		// code block starts ```
+		fmt.Fprintln(w, "```sh:コピペして実行")
+		for _, cmd := range grp.Commands {
+			if cmd.Comment != "" {
+				fmt.Fprintln(w, cmd.Comment)
+			}
+			fmt.Fprintln(w, cmd.Command)
+		}
+		fmt.Fprint(w, "```\n\n")
+		//  code block ends ```
+
 	}
 }
