@@ -14,15 +14,28 @@ type SingleCommand struct {
 }
 
 type CommandGroup struct {
-	Title    string
-	Commands []SingleCommand // can be only one SingleCommand
+	title    string
+	commands []SingleCommand // can be only one SingleCommand
+	results  string
+}
+
+func commandGroup(cmd ...string) CommandGroup {
+	return commandGroup()
+}
+
+func (grp *CommandGroup) addTitle(title string) {
+	grp.title = title
+}
+
+func (grp *CommandGroup) addResults(results string) {
+	grp.results = results
 }
 
 func RunCommands(cmdGroups []CommandGroup) {
 	input := bufio.NewScanner(os.Stdin)
 
 	for _, grp := range cmdGroups {
-		for _, cmd := range grp.Commands {
+		for _, cmd := range grp.commands {
 			if cmd.Command == "" {
 				continue // empty Command is ignored
 			}
@@ -50,18 +63,23 @@ func RunCommands(cmdGroups []CommandGroup) {
 
 func WriteMarkdown(w io.Writer, cmdGroups []CommandGroup) {
 	for _, grp := range cmdGroups {
-		fmt.Fprintln(w, grp.Title)
+		fmt.Fprintln(w, grp.title)
 
-		// code block starts ```
-		fmt.Fprintln(w, "```sh:コピペして実行")
-		for _, cmd := range grp.Commands {
-			if cmd.Comment != "" {
-				fmt.Fprintln(w, cmd.Comment)
+		if len(grp.commands) > 0 {
+			fmt.Fprintln(w, "```sh:コピペして実行")
+			for _, cmd := range grp.commands {
+				if cmd.Comment != "" {
+					fmt.Fprintln(w, cmd.Comment)
+				}
+				fmt.Fprintln(w, cmd.Command)
 			}
-			fmt.Fprintln(w, cmd.Command)
+			fmt.Fprint(w, "```\n\n")
 		}
-		fmt.Fprint(w, "```\n\n")
-		//  code block ends ```
 
+		if grp.Results != "" {
+			fmt.Fprintln(w, "```sh:コピペして実行")
+			fmt.Fprintln(w, grp.results)
+			fmt.Fprint(w, "```\n\n")
+		}
 	}
 }
