@@ -9,8 +9,19 @@ import (
 )
 
 type singleCommand struct {
-	comment string
 	command string //if empty string, ignored in run, and empty line in markdown
+}
+
+func (c *singleCommand) isComment() bool {
+	for _, c := range c.command {
+		if c == ' ' {
+			continue
+		} else if c == '#' {
+			return true
+		}
+	}
+
+	return false
 }
 
 type CommandGroup struct {
@@ -68,9 +79,6 @@ func WriteMarkdown(w io.Writer, cmdGroups []CommandGroup) {
 		if len(grp.commands) > 0 {
 			fmt.Fprintln(w, "```sh:コピペして実行")
 			for _, cmd := range grp.commands {
-				if cmd.comment != "" {
-					fmt.Fprintln(w, cmd.comment)
-				}
 				fmt.Fprintln(w, cmd.command)
 			}
 			fmt.Fprint(w, "```\n\n")
