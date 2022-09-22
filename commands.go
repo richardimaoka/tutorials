@@ -44,8 +44,13 @@ type CommandGroup struct {
 	results  string
 }
 
-func Commands(cmd ...string) CommandGroup {
-	return CommandGroup{}
+func Commands(cmds ...string) CommandGroup {
+	var sc []singleCommand
+	for _, cmd := range cmds {
+		sc = append(sc, singleCommand{command: cmd})
+	}
+
+	return CommandGroup{commands: sc}
 }
 
 func (grp *CommandGroup) addTitle(title string) {
@@ -66,9 +71,8 @@ func RunCommands(cmdGroups []CommandGroup) {
 			}
 
 			prompt := promptui.Select{
-				Label: "Executing the command",
-				Items: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-					"Saturday", "Sunday"},
+				Label: fmt.Sprintf("> %s", cmd.command),
+				Items: []string{"Execute", "Skip"},
 			}
 
 			_, result, err := prompt.Run()
