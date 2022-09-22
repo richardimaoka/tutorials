@@ -24,6 +24,18 @@ func (c *singleCommand) isComment() bool {
 	return false
 }
 
+func (c *singleCommand) isEmpty() bool {
+	for _, c := range c.command {
+		if c == ' ' {
+			continue
+		} else {
+			return false
+		}
+	}
+
+	return true
+}
+
 type CommandGroup struct {
 	title    string
 	commands []singleCommand // can be only one singleCommand
@@ -47,8 +59,8 @@ func RunCommands(cmdGroups []CommandGroup) {
 
 	for _, grp := range cmdGroups {
 		for _, cmd := range grp.commands {
-			if cmd.command == "" {
-				continue // empty Command is ignored
+			if cmd.isComment() || cmd.isEmpty() {
+				continue // ignored
 			}
 
 			fmt.Println("### Executing the following command ###")
