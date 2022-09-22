@@ -8,14 +8,14 @@ import (
 	"os/exec"
 )
 
-type SingleCommand struct {
-	Comment string
-	Command string //if empty string, ignored in run, and empty line in markdown
+type singleCommand struct {
+	comment string
+	command string //if empty string, ignored in run, and empty line in markdown
 }
 
 type CommandGroup struct {
 	title    string
-	commands []SingleCommand // can be only one SingleCommand
+	commands []singleCommand // can be only one singleCommand
 	results  string
 }
 
@@ -36,12 +36,12 @@ func RunCommands(cmdGroups []CommandGroup) {
 
 	for _, grp := range cmdGroups {
 		for _, cmd := range grp.commands {
-			if cmd.Command == "" {
+			if cmd.command == "" {
 				continue // empty Command is ignored
 			}
 
 			fmt.Println("### Executing the following command ###")
-			fmt.Println(cmd.Command)
+			fmt.Println(cmd.command)
 			fmt.Print("[y/n] ")
 
 			input.Scan()
@@ -49,7 +49,7 @@ func RunCommands(cmdGroups []CommandGroup) {
 			switch text {
 			case "y":
 				fmt.Println("executing")
-				execCmd := exec.Command("sh", "-c", cmd.Command)
+				execCmd := exec.Command("sh", "-c", cmd.command)
 				output, _ := execCmd.CombinedOutput()
 				fmt.Println(string(output))
 			case "n":
@@ -68,10 +68,10 @@ func WriteMarkdown(w io.Writer, cmdGroups []CommandGroup) {
 		if len(grp.commands) > 0 {
 			fmt.Fprintln(w, "```sh:コピペして実行")
 			for _, cmd := range grp.commands {
-				if cmd.Comment != "" {
-					fmt.Fprintln(w, cmd.Comment)
+				if cmd.comment != "" {
+					fmt.Fprintln(w, cmd.comment)
 				}
-				fmt.Fprintln(w, cmd.Command)
+				fmt.Fprintln(w, cmd.command)
 			}
 			fmt.Fprint(w, "```\n\n")
 		}
