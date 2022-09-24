@@ -16,7 +16,7 @@
       "type": "go",
       "request": "attach",
       "mode": "local",
-      "processId": 21057 //changes every time
+      "processId": "${input:processId}" //changes every time
     }
   ]
 }

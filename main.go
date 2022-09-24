@@ -9,7 +9,10 @@ func main() {
 		"echo def",
 		"",
 		"# this is a comment",
-		"echo jaff",
+		"echo jaff1",
+		"echo jaff2",
+		"echo jaff3",
+		"echo jaff4",
 	))
 
 	RunCommands(cmds)
